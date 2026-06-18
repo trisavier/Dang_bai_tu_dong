@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# === GOOGLE GEMINI API (Miễn phí) ===
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+# === OPENROUTER API ===
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
 
 # === FACEBOOK API (DA GO BO) ===
 # Du an chuyen sang che do tro ly viet bai.

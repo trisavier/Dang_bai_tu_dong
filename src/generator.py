@@ -1,11 +1,9 @@
 """
-src/generator.py — Sinh bài viết Facebook bằng Google Gemini API (Miễn phí)
-Dùng SDK mới: google-genai (thay thế google-generativeai đã deprecated)
+src/generator.py — Sinh bài viết Facebook bằng OpenRouter API
 """
 import logging
 from typing import Dict, Optional, Tuple
-from google import genai
-from google.genai import types
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -85,13 +83,31 @@ Nhiệm vụ của bạn là viết một bài đăng Facebook giới thiệu s�
 
 
 class PostGenerator:
-    """Sinh bài viết Facebook bằng Google Gemini API (mien phi)."""
+    """Sinh bài viết Facebook bằng OpenRouter API."""
 
     def __init__(self, api_key: str, model: str, company_info: str, city: str):
-        self.client = genai.Client(api_key=api_key)
+        self.api_key = api_key
         self.model_name = model
         self.company_info = company_info
         self.city = city
+
+    def _call_openrouter(self, user_prompt: str, max_tokens: int = 8000) -> str:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.7,
+            "max_tokens": max_tokens
+        }
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
 
     def _build_user_prompt(self, product: Dict, posted_names: list) -> str:
         """Tao user prompt voi thong tin san pham."""
@@ -133,17 +149,7 @@ Yeu cau:
         user_prompt = self._build_user_prompt(product, posted_names)
         logger.info("Dang sinh bai viet cho: %s (model: %s)", product.get('name', 'unknown'), self.model_name)
 
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=user_prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                max_output_tokens=8000,
-                temperature=0.7,
-            ),
-        )
-
-        full_text = response.text.strip()
+        full_text = self._call_openrouter(user_prompt, max_tokens=8000).strip()
         lines = full_text.split("\n")
 
         product_name = product.get("name", "Unknown")
@@ -192,17 +198,7 @@ QUAN TRONG: Dong dau tien cua response phai la:
 PRODUCT_NAME: [ten san pham]
 Sau do moi la noi dung bai viet."""
 
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                max_output_tokens=2500,
-                temperature=0.7,
-            ),
-        )
-
-        full_text = response.text.strip()
+        full_text = self._call_openrouter(prompt, max_tokens=2500).strip()
         lines = full_text.split("\n")
 
         product_name = "Unknown"

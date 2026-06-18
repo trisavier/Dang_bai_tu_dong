@@ -44,8 +44,8 @@ logger = logging.getLogger("CameraBot")
 db = ProductDatabase(config.PRODUCTS_FILE)
 scraper = ProductScraper(config.PRODUCTS_URL)
 generator = PostGenerator(
-    api_key=config.GEMINI_API_KEY,
-    model=config.GEMINI_MODEL,
+    api_key=config.OPENROUTER_API_KEY,
+    model=config.OPENROUTER_MODEL,
     company_info=config.COMPANY_INFO,
     city=config.COMPANY_CITY,
 )
@@ -97,8 +97,8 @@ def daily_job():
 def check_config():
     """Kiem tra cau hinh co day du khong."""
     errors = []
-    if not config.GEMINI_API_KEY or config.GEMINI_API_KEY == "":
-        errors.append("[LOI] GEMINI_API_KEY chua duoc cau hinh trong .env")
+    if not config.OPENROUTER_API_KEY or config.OPENROUTER_API_KEY == "":
+        errors.append("[LOI] OPENROUTER_API_KEY chua duoc cau hinh trong .env")
 
     if errors:
         for e in errors:
@@ -130,7 +130,7 @@ Ví dụ sử dụng:
     args = parser.parse_args()
 
     print("=" * 50)
-    print("  Camera Post Automation Bot (Gemini AI)")
+    print("  Camera Post Automation Bot (OpenRouter API)")
     print("=" * 50)
 
     # Kiểm tra cấu hình
