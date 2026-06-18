@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 import sys
+import threading
 
 # Fix Unicode/emoji tren Windows console
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -161,8 +162,24 @@ Ví dụ sử dụng:
         daily_job()
         return
 
-    # Mở dashboard
+    # Mở dashboard và chạy nền hẹn giờ
     if args.dashboard:
+        if not check_config():
+            sys.exit(1)
+
+        # Lên lịch chạy nền
+        post_time = args.time
+        scheduler = BotScheduler(job_func=daily_job, post_time=post_time)
+        scheduler.setup()
+
+        def run_scheduler():
+            scheduler.start()
+
+        scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+        scheduler_thread.start()
+
+        print(f"\n[OK] Đã bật hẹn giờ tự động tạo bài lúc {post_time} mỗi ngày chạy ngầm cùng Dashboard!")
+
         from web.app import create_app
         app = create_app(db, scraper, generator)
         print(f"\n🌐 Dashboard: http://localhost:{config.DASHBOARD_PORT}")
