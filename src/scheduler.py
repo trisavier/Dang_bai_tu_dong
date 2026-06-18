@@ -26,8 +26,10 @@ class BotScheduler:
     def setup(self):
         """Cấu hình lịch chạy."""
         schedule.clear()
-        schedule.every().day.at(self.post_time).do(self._run_job)
-        logger.info(f"✅ Đã lên lịch đăng bài lúc {self.post_time} mỗi ngày.")
+        schedule.every().monday.at(self.post_time).do(self._run_job)
+        schedule.every().wednesday.at(self.post_time).do(self._run_job)
+        schedule.every().friday.at(self.post_time).do(self._run_job)
+        logger.info(f"✅ Đã lên lịch đăng bài lúc {self.post_time} vào Thứ 2, Thứ 4, Thứ 6.")
 
     def _run_job(self):
         """Wrapper để bắt lỗi khi chạy job."""
@@ -45,7 +47,7 @@ class BotScheduler:
     def start(self):
         """Bắt đầu vòng lặp chờ lịch."""
         self._is_running = True
-        logger.info(f"🚀 Bot đang chạy, đăng bài lúc {self.post_time} mỗi ngày.")
+        logger.info(f"🚀 Bot đang chạy, đăng bài lúc {self.post_time} vào Thứ 2, Thứ 4, Thứ 6.")
         logger.info("   Nhấn Ctrl+C để dừng.\n")
 
         while self._is_running:

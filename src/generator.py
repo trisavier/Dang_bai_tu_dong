@@ -107,7 +107,16 @@ class PostGenerator:
         }
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        
+        resp_json = response.json()
+        if "error" in resp_json:
+            raise Exception(f"OpenRouter API Error: {resp_json['error']}")
+            
+        choice = resp_json["choices"][0]
+        if "error" in choice and choice["error"]:
+            raise Exception(f"OpenRouter Stream Error: {choice['error']}")
+            
+        return choice["message"]["content"]
 
     def _build_user_prompt(self, product: Dict, posted_names: list) -> str:
         """Tao user prompt voi thong tin san pham."""
